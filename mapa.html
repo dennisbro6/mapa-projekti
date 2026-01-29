@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Moja prva mapa</title>
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWRtaW4tbWFya2VsaiIsImEiOiJjbHVkdWR3dmowNmFyMmpvY2JlcHFkdG5yIn0.bm77AlVnfflYXAGSl9bUBA';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [14.5058, 46.0569], // Ljubljana
+    zoom: 10
+  });
+</script>
+
+<script>
+fetch("https://opensheet.elk.sh/1jXHwLJAQUYiyBKwiGR3zSVmq1b-FD95yqgAftBUkWGc/Sheet1")
+  .then(response => response.json())
+  .then(data => {
+    const dovoljeniStatusi = [
+  "🚚Pripravljeno za montažo",
+  "🧱Sestava",
+  "🌈Lakirnica"
+];
+    const bounds = new mapboxgl.LngLatBounds();
+function barvaPina(status) {
+  if (status === "🚚Pripravljeno za montažo") return "#00c2ff";
+  if (status === "🧱Sestava") return "#ff8c00";
+  if (status === "🌈Lakirnica") return "#9b59b6";
+  return "#7f8c8d";
+}
+
+   function barvaPina(status) {
+  if (status === "🚚Pripravljeno za montažo") return "#00c2ff";
+  if (status === "🧱Sestava") return "#ff8c00";
+  if (status === "🌈Lakirnica") return "#9b59b6";
+  return "#7f8c8d";
+}
+
+data.forEach(p => {
+
+  if (!dovoljeniStatusi.includes(p.status)) return;
+  if (!p.lat || !p.lng) return;
+
+  bounds.extend([parseFloat(p.lng), parseFloat(p.lat)]);
+
+ const popup = new mapboxgl.Popup()
+  .setHTML(`
+    <strong>
+      <a href="${p.tapeUrl}" target="_blank" rel="noopener noreferrer">
+        ${p.name}
+      </a>
+    </strong><br>
+    📍 ${p.address}<br>
+    ${p.status}
+  `);
+
+  new mapboxgl.Marker({
+    color: barvaPina(p.status)
+  })
+    .setLngLat([parseFloat(p.lng), parseFloat(p.lat)])
+    .setPopup(popup)
+    .addTo(map);
+});
+    if (!bounds.isEmpty()) {
+  map.fitBounds(bounds, { padding: 50 });
+}
+  });
+</script>
+
+</body>
+</html>
+
